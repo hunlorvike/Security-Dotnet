@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: pg-custom-security
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: dotnet_security
+      POSTGRES_USER: user_security
+      POSTGRES_PASSWORD: pass_security
+    ports:
+      - "5555:5432"
+    security_opt:
+      - seccomp:unconfined
+    restart: always
+
