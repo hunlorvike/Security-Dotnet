@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace CustomSecurityDotnet.Controllers
 {
+    [ApiController]
     [Route("Auth")]
     public class AuthController : ControllerBase
     {
@@ -56,13 +57,20 @@ namespace CustomSecurityDotnet.Controllers
 
                 if (result.Succeeded)
                 {
-                    var defaultRole = AppConstants.DefaultUserRole;
-                    if (!await _roleManager.RoleExistsAsync(defaultRole))
+                    var defaultRoleExists = await _roleManager.RoleExistsAsync(
+                        AppConstants.DefaultUserRole
+                    );
+                    if (!defaultRoleExists)
                     {
-                        await _roleManager.CreateAsync(new ApplicationRole { Name = defaultRole });
+                        await _roleManager.CreateAsync(
+                            new ApplicationRole { Name = AppConstants.DefaultUserRole }
+                        );
                     }
 
-                    await _userManager.AddToRoleAsync(applicationUser, defaultRole);
+                    await _userManager.AddToRoleAsync(
+                        applicationUser,
+                        AppConstants.DefaultUserRole
+                    );
 
                     return Ok(new { message = _localizer["User registered successfully."].Value });
                 }
@@ -83,36 +91,38 @@ namespace CustomSecurityDotnet.Controllers
         {
             var user = await _userManager.FindByNameAsync(loginDto.UserName);
 
-            if (user != null)
+            if (user != null && await _userManager.CheckPasswordAsync(user, loginDto.Password))
             {
-                if (await _userManager.CheckPasswordAsync(user, loginDto.Password))
+                var claims = new List<Claim>
                 {
-                    var claims = new List<Claim> { new Claim("UserID", user.Id.ToString()), };
+                    new Claim("UserId", user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.UserName),
+                };
 
-                    var userRoles = await _userManager.GetRolesAsync(user);
+                var userRoles = await _userManager.GetRolesAsync(user);
+                claims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-                    claims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(claims),
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = new SigningCredentials(
+                        new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(
+                                "aLongSecretStringWhoseBitnessIsEqualToOrGreaterThanTheBitnessOfTheTokenEncryptionAlgorithm"
+                            )
+                        ),
+                        SecurityAlgorithms.HmacSha256Signature
+                    ),
+                    Issuer = "NguyenVietHung",
+                    Audience = "NguyenVietHung",
+                };
 
-                    var tokenDescriptor = new SecurityTokenDescriptor
-                    {
-                        Subject = new ClaimsIdentity(claims),
-                        Expires = DateTime.UtcNow.AddDays(1),
-                        SigningCredentials = new SigningCredentials(
-                            new SymmetricSecurityKey(
-                                Encoding.UTF8.GetBytes(
-                                    "aLongSecretStringWhoseBitnessIsEqualToOrGreaterThanTheBitnessOfTheTokenEncryptionAlgorithm"
-                                )
-                            ),
-                            SecurityAlgorithms.HmacSha256Signature
-                        )
-                    };
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var securityToken = tokenHandler.CreateToken(tokenDescriptor);
+                var token = tokenHandler.WriteToken(securityToken);
 
-                    var tokenHandler = new JwtSecurityTokenHandler();
-                    var securityToken = tokenHandler.CreateToken(tokenDescriptor);
-                    var token = tokenHandler.WriteToken(securityToken);
-
-                    return Ok(new { token });
-                }
+                return Ok(new { token });
             }
 
             return BadRequest(
@@ -132,6 +142,28 @@ namespace CustomSecurityDotnet.Controllers
         [Route("Check/UserRole")]
         [Authorize(Roles = AppConstants.DefaultUserRole)]
         public IActionResult CheckUserRole()
+        {
+            Console.WriteLine("Check role user");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userName = User.Identity?.Name;
+
+            var userRoles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+
+            return Ok(
+                new
+                {
+                    userId,
+                    userName,
+                    userRoles,
+                    message = $"User {userName} (ID: {userId}) has the required role(s) to access this action."
+                }
+            );
+        }
+
+        [HttpGet]
+        [Route("Check/AdminRole")]
+        [Authorize(Roles = AppConstants.AdminRole)]
+        public IActionResult CheckAdminRole()
         {
             Console.WriteLine("Check role user");
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

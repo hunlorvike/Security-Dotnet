@@ -10,7 +10,7 @@ namespace CustomSecurityDotnet.Dtos
     {
         [Display(Name = "UserName")]
         [Required(ErrorMessage = "The {0} field is mandatory.")]
-        public string? UserName { get; set; }
+        public string UserName { get; set; }
 
         [Display(Name = "Email")]
         [Required(ErrorMessage = "The {0} field is mandatory.")]
@@ -24,7 +24,7 @@ namespace CustomSecurityDotnet.Dtos
             ErrorMessage = "The {0} must be between {2} and {1} characters long.",
             MinimumLength = 8
         )]
-        public string? Password { get; set; }
+        public string Password { get; set; }
 
         [Display(Name = "FullName")]
         [Required(ErrorMessage = "The {0} field is mandatory.")]
