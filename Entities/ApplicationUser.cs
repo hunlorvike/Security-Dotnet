@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Identity;
 
 namespace CustomSecurityDotnet.Entities
 {
-    [Table("users")]
     public class ApplicationUser : IdentityUser<int>
     {
         public string? Name { get; set; } = string.Empty;

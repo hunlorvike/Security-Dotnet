@@ -24,7 +24,12 @@ namespace CustomSecurityDotnet.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public AuthController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IStringLocalizer<AuthController> localizer, RoleManager<ApplicationRole> roleManager)
+        public AuthController(
+            UserManager<ApplicationUser> userManager,
+            ApplicationDbContext context,
+            IStringLocalizer<AuthController> localizer,
+            RoleManager<ApplicationRole> roleManager
+        )
         {
             _context = context;
             _userManager = userManager;
@@ -78,47 +83,48 @@ namespace CustomSecurityDotnet.Controllers
         {
             var user = await _userManager.FindByNameAsync(loginDto.UserName);
 
-            if (user != null && await _userManager.CheckPasswordAsync(user, loginDto.Password))
+            if (user != null)
             {
-                var claims = new List<Claim>
-        {
-            new Claim("UserID", user.Id.ToString()),
-        };
-
-                var userRoles = await _userManager.GetRolesAsync(user);
-
-                claims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-                var tokenDescriptor = new SecurityTokenDescriptor
+                if (await _userManager.CheckPasswordAsync(user, loginDto.Password))
                 {
-                    Subject = new ClaimsIdentity(claims),
-                    Expires = DateTime.UtcNow.AddDays(1),
-                    SigningCredentials = new SigningCredentials(
-                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes("aLongSecretStringWhoseBitnessIsEqualToOrGreaterThanTheBitnessOfTheTokenEncryptionAlgorithm")),
-                        SecurityAlgorithms.HmacSha256Signature
-                    )
-                };
+                    var claims = new List<Claim> { new Claim("UserID", user.Id.ToString()), };
 
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var securityToken = tokenHandler.CreateToken(tokenDescriptor);
-                var token = tokenHandler.WriteToken(securityToken);
+                    var userRoles = await _userManager.GetRolesAsync(user);
 
-                return Ok(new { token });
+                    claims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+                    var tokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(claims),
+                        Expires = DateTime.UtcNow.AddDays(1),
+                        SigningCredentials = new SigningCredentials(
+                            new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(
+                                    "aLongSecretStringWhoseBitnessIsEqualToOrGreaterThanTheBitnessOfTheTokenEncryptionAlgorithm"
+                                )
+                            ),
+                            SecurityAlgorithms.HmacSha256Signature
+                        )
+                    };
+
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var securityToken = tokenHandler.CreateToken(tokenDescriptor);
+                    var token = tokenHandler.WriteToken(securityToken);
+
+                    return Ok(new { token });
+                }
             }
-            else
-            {
-                return BadRequest(new { error = _localizer["Username or password is incorrect."].Value });
-            }
+
+            return BadRequest(
+                new { error = _localizer["Username or password is incorrect."].Value }
+            );
         }
-
 
         [HttpPost]
         [Route("Logout")]
         [Authorize]
         public IActionResult Logout()
         {
-            // Depending on your authentication mechanism, you might want to perform additional logout steps here.
-
             return Ok(new { message = _localizer["Logout successful."].Value });
         }
 
@@ -133,15 +139,22 @@ namespace CustomSecurityDotnet.Controllers
 
             var userRoles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
 
-            return Ok(new
-            {
-                userId,
-                userName,
-                userRoles,
-                message = $"User {userName} (ID: {userId}) has the required role(s) to access this action."
-            });
+            return Ok(
+                new
+                {
+                    userId,
+                    userName,
+                    userRoles,
+                    message = $"User {userName} (ID: {userId}) has the required role(s) to access this action."
+                }
+            );
         }
 
+        [HttpGet]
+        [Route("Hello-World")]
+        public IActionResult HelloWorld()
+        {
+            return Ok("Hello World");
+        }
     }
-
 }
