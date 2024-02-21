@@ -17,29 +17,26 @@ using Microsoft.IdentityModel.Tokens;
 namespace CustomSecurityDotnet.Controllers
 {
     [ApiController]
-    [Route("Auth")]
+    [Route(Routes.AUTH)]
     public class AuthController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IStringLocalizer<AuthController> _localizer;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly AppSettings _appSettings;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
-            ApplicationDbContext context,
-            IStringLocalizer<AuthController> localizer,
-            RoleManager<ApplicationRole> roleManager
+            RoleManager<ApplicationRole> roleManager,
+            IOptions<AppSettings> appSettings
         )
         {
-            _context = context;
             _userManager = userManager;
-            _localizer = localizer;
             _roleManager = roleManager;
+            _appSettings = appSettings.Value;
         }
 
         [HttpPost]
-        [Route("Register")]
+        [Route("register")]
         public async Task<IActionResult> Register(RegisterDto registerDto)
         {
             var applicationUser = new ApplicationUser()
@@ -86,7 +83,7 @@ namespace CustomSecurityDotnet.Controllers
         }
 
         [HttpPost]
-        [Route("Login")]
+        [Route("login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
             var user = await _userManager.FindByNameAsync(loginDto.UserName);
@@ -131,7 +128,7 @@ namespace CustomSecurityDotnet.Controllers
         }
 
         [HttpPost]
-        [Route("Logout")]
+        [Route("logout")]
         [Authorize]
         public IActionResult Logout()
         {
@@ -139,7 +136,7 @@ namespace CustomSecurityDotnet.Controllers
         }
 
         [HttpGet]
-        [Route("Check/UserRole")]
+        [Route("check/role-user")]
         [Authorize(Roles = AppConstants.DefaultUserRole)]
         public IActionResult CheckUserRole()
         {
@@ -161,11 +158,11 @@ namespace CustomSecurityDotnet.Controllers
         }
 
         [HttpGet]
-        [Route("Check/AdminRole")]
+        [Route("check/role-admin")]
         [Authorize(Roles = AppConstants.AdminRole)]
         public IActionResult CheckAdminRole()
         {
-            Console.WriteLine("Check role user");
+            Console.WriteLine("Check role admin");
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userName = User.Identity?.Name;
 
@@ -180,13 +177,6 @@ namespace CustomSecurityDotnet.Controllers
                     message = $"User {userName} (ID: {userId}) has the required role(s) to access this action."
                 }
             );
-        }
-
-        [HttpGet]
-        [Route("Hello-World")]
-        public IActionResult HelloWorld()
-        {
-            return Ok("Hello World");
         }
     }
 }
