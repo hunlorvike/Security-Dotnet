@@ -12,28 +12,30 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CustomSecurityDotnet.Controllers
 {
     [ApiController]
-    [Route(Routes.AUTH)]
+    [Route("auth")]
     public class AuthController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
-        private readonly AppSettings _appSettings;
+        private readonly IStringLocalizer<AuthController> _localizer;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager,
-            IOptions<AppSettings> appSettings
+            IStringLocalizer<AuthController> localizer
         )
         {
             _userManager = userManager;
             _roleManager = roleManager;
-            _appSettings = appSettings.Value;
+            _localizer = localizer;
         }
+
 
         [HttpPost]
         [Route("register")]
