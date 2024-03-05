@@ -185,9 +185,9 @@ namespace CustomSecurityDotnet.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "25a8ea2d-d316-4c63-9d1e-e761258c159a", null, "Admin", "ADMIN" },
-                    { "6d897695-2d83-49b2-86ac-589ff786ac44", null, "User", "USER" },
-                    { "ae88743c-4b9e-45cc-ba63-0bc6f0e01525", null, "Manager", "MANAGER" }
+                    { "a6384aef-1f55-46e0-90fc-7c1c42183489", null, "Manager", "Manager" },
+                    { "bcaab403-6867-41ed-9996-4d28b0740e02", null, "User", "User" },
+                    { "eb806247-bc9b-4d06-b12b-c16f0e0916c5", null, "Admin", "Admin" }
                 });
 
             migrationBuilder.CreateIndex(

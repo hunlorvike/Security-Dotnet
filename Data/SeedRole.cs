@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CustomSecurityDotnet.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -16,18 +12,18 @@ namespace CustomSecurityDotnet.Data
             builder.HasData(
                 new IdentityRole
                 {
-                    Name = AppConstants.DefaultUserRole,
-                    NormalizedName = AppConstants.DefaultUserRole.ToUpper()
+                    Name = ERole.Admin.ToString(), 
+                    NormalizedName = ERole.Admin.ToString()
                 },
                 new IdentityRole
                 {
-                    Name = AppConstants.AdminRole,
-                    NormalizedName = AppConstants.AdminRole.ToUpper()
+                    Name = ERole.Manager.ToString(),  
+                    NormalizedName = ERole.Manager.ToString()
                 },
                 new IdentityRole
                 {
-                    Name = AppConstants.ManagerRole,
-                    NormalizedName = AppConstants.ManagerRole.ToUpper()
+                    Name = ERole.User.ToString(),
+                    NormalizedName = ERole.User.ToString()
                 }
             );
         }

@@ -154,21 +154,21 @@ namespace CustomSecurityDotnet.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "6d897695-2d83-49b2-86ac-589ff786ac44",
-                            Name = "User",
-                            NormalizedName = "USER"
-                        },
-                        new
-                        {
-                            Id = "25a8ea2d-d316-4c63-9d1e-e761258c159a",
+                            Id = "eb806247-bc9b-4d06-b12b-c16f0e0916c5",
                             Name = "Admin",
-                            NormalizedName = "ADMIN"
+                            NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "ae88743c-4b9e-45cc-ba63-0bc6f0e01525",
+                            Id = "a6384aef-1f55-46e0-90fc-7c1c42183489",
                             Name = "Manager",
-                            NormalizedName = "MANAGER"
+                            NormalizedName = "Manager"
+                        },
+                        new
+                        {
+                            Id = "bcaab403-6867-41ed-9996-4d28b0740e02",
+                            Name = "User",
+                            NormalizedName = "User"
                         });
                 });
 

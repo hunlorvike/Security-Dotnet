@@ -55,7 +55,7 @@ builder.Services.AddAuthorization(options =>
         {
             policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
             policy.RequireAuthenticatedUser();
-            policy.RequireRole(AppConstants.DefaultUserRole);
+            policy.RequireRole(ERole.User.ToString());
         }
     );
 });
