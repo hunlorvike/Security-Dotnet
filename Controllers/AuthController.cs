@@ -1,12 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using CustomSecurityDotnet.Dtos;
+using CustomSecurityDotnet.Dtos.Auth;
 using CustomSecurityDotnet.Entities;
 using CustomSecurityDotnet.Services;
 using CustomSecurityDotnet.Utils;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -57,7 +56,7 @@ namespace CustomSecurityDotnet.Controllers
 
             try
             {
-                var result = await _userManager.CreateAsync(applicationUser, registerDto.Password);
+                var result = await _userManager.CreateAsync(applicationUser, registerDto.Password ?? "");
 
                 if (result.Succeeded)
                 {
@@ -140,9 +139,9 @@ namespace CustomSecurityDotnet.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = await _userManager.FindByNameAsync(loginDto.UserName);
+            var user = await _userManager.FindByNameAsync(loginDto.UserName ?? "");
 
-            if (user != null && await _userManager.CheckPasswordAsync(user, loginDto.Password))
+            if (user != null && await _userManager.CheckPasswordAsync(user, loginDto.Password ?? ""))
             {
                 if (!user.IsActive)
                 {
@@ -232,7 +231,7 @@ namespace CustomSecurityDotnet.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);
+            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email ?? "");
 
             if (user == null)
             {
@@ -291,20 +290,20 @@ namespace CustomSecurityDotnet.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = await _userManager.FindByIdAsync(resetPasswordDto.UserId);
+            var user = await _userManager.FindByIdAsync(resetPasswordDto.UserId ?? "");
 
             if (user == null)
             {
                 return BadRequest(new { error = _localizer["User not found."].Value });
             }
 
-            var decodedToken = WebEncoders.Base64UrlDecode(resetPasswordDto.Token);
+            var decodedToken = WebEncoders.Base64UrlDecode(resetPasswordDto.Token ?? "");
             var token = Encoding.UTF8.GetString(decodedToken);
 
             var result = await _userManager.ResetPasswordAsync(
                 user,
                 token,
-                resetPasswordDto.NewPassword
+                resetPasswordDto.NewPassword ?? ""
             );
 
             if (result.Succeeded)

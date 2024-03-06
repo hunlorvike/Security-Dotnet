@@ -4,15 +4,15 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CustomSecurityDotnet.Dtos
+namespace CustomSecurityDotnet.Dtos.Auth
 {
     public class LoginDto
     {
         [Required(ErrorMessage = "Tài khoản không được để trống")]
-        public string UserName { get; set; }
+        public string? UserName { get; set; }
 
         [Required(ErrorMessage = "Mật khẩu không được để trống")]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string? Password { get; set; }
     }
 }
